@@ -6,11 +6,10 @@ defmodule SongExplorer.Deezer.Client do
   def search_artist(name) do
     case Req.get("#{@base_url}/search/artist", params: [q: name]) do
       {:ok, %{status: 200, body: %{"data" => data}}} when data != [] ->
-        artist =
-          data
-          |> Enum.max_by(fn artist -> artist["nb_fan"] end)
+        %{"name" => artist_name, "id" => artist_id} =
+          Enum.max_by(data, fn %{"nb_fan" => nb_fan} -> nb_fan end)
 
-        {:ok, %{name: artist["name"], deezer_id: artist["id"]}}
+        {:ok, %{name: artist_name, deezer_id: artist_id}}
 
       {:ok, %{status: 200, body: %{"data" => []}}} ->
         {:error, :not_found}
@@ -24,24 +23,29 @@ defmodule SongExplorer.Deezer.Client do
   Récupère les albums d'un artiste via son Deezer ID.
   """
   def get_albums(deezer_id) do
-    # GET @base_url/artist/{deezer_id}/albums
-    # Retourner la liste des albums
-    # Format attendu : {:ok, [%{title: ..., release_date: ...}]} ou {:error, reason}
+    fetch_all_albums("#{@base_url}/artist/#{deezer_id}/albums", [])
+  end
 
-    case Req.get("#{@base_url}/artist/#{deezer_id}/albums") do
+  defp fetch_all_albums(url, acc) do
+    case Req.get(url) do
+      {:ok, %{status: 200, body: %{"data" => data, "next" => next_page_url}}}
+      when data != [] ->
+        fetch_all_albums(next_page_url, extract_albums(data, acc))
+
       {:ok, %{status: 200, body: %{"data" => data}}} when data != [] ->
-        albums =
-          Enum.map(data, fn album ->
-            %{title: album["title"], release_date: album["release_date"]}
-          end)
-
-        {:ok, albums}
+        {:ok, Enum.reverse(extract_albums(data, acc))}
 
       {:ok, %{status: 200, body: %{"data" => []}}} ->
-        {:error, :not_found}
+        if acc == [], do: {:error, :not_found}, else: {:ok, Enum.reverse(acc)}
 
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  defp extract_albums(data, acc) do
+    Enum.reduce(data, acc, fn %{"title" => title, "release_date" => release_date}, acc ->
+      [%{title: title, release_date: release_date} | acc]
+    end)
   end
 end
