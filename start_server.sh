@@ -17,4 +17,4 @@ else
 fi
 
 echo "Starting SongExplorer server..."
-mix phx.server
+iex -S mix phx.server
