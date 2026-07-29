@@ -30,3 +30,6 @@ mix.lock
 
 # Elixir LS
 .elixir_ls
+
+# Environment variables
+.env
