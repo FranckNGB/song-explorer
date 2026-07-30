@@ -12,10 +12,34 @@ defmodule SongExplorerWeb.ArtistController do
   4. Sauvegarder l'artiste et ses albums en base de manière asynchrone
   """
   use SongExplorerWeb, :controller
+  use OpenApiSpex.ControllerSpecs
   require Logger
 
   alias SongExplorer.Catalog
   alias SongExplorer.Deezer.Client
+  alias SongExplorerWeb.Schemas.{AlbumsResponse, ErrorResponse}
+
+  operation(:albums,
+    summary: "Récupérer les albums d'un artiste",
+    description:
+      "Recherche un artiste par son nom et retourne la liste de ses albums. " <>
+        "Si l'artiste est déjà en base, les données sont retournées directement. " <>
+        "Sinon, l'API Deezer est interrogée et l'artiste est sauvegardé en base de manière asynchrone.",
+    parameters: [
+      name: [
+        in: :path,
+        type: :string,
+        description: "Nom de l'artiste",
+        required: true,
+        example: "drake"
+      ]
+    ],
+    responses: %{
+      200 => {"Liste des albums", "application/json", AlbumsResponse},
+      404 => {"Artiste non trouvé", "application/json", ErrorResponse},
+      503 => {"API Deezer indisponible", "application/json", ErrorResponse}
+    }
+  )
 
   @doc """
   Retourne la liste des albums d'un artiste au format JSON.

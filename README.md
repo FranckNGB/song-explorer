@@ -47,6 +47,13 @@ mix ecto.migrate
 
 L'API est disponible sur `http://localhost:4000`.
 
+## Documentation Swagger
+
+Une interface Swagger UI est disponible pour explorer et tester l'API :
+
+- **Swagger UI** : `http://localhost:4000/swaggerui`
+- **Spec OpenAPI (JSON)** : `http://localhost:4000/api/openapi`
+
 ## Utilisation
 
 ### Récupérer les albums d'un artiste

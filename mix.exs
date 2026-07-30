@@ -45,7 +45,8 @@ defmodule SongExplorer.MixProject do
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:req, "~> 0.5"},
-      {:bypass, "~> 2.1", only: :test}
+      {:bypass, "~> 2.1", only: :test},
+      {:open_api_spex, "~> 3.21"}
     ]
   end
 
