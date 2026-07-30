@@ -44,7 +44,8 @@ defmodule SongExplorer.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:req, "~> 0.5"}
+      {:req, "~> 0.5"},
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 
