@@ -113,6 +113,14 @@ mix credo
 
 ## Architecture
 
+```
+Controller → ArtistLookup (orchestration)
+                 ├── Catalog (persistence DB)
+                 └── Deezer.Client (API HTTP)
+```
+
+- **`SongExplorerWeb.ArtistController`** — Controller REST, gère les réponses HTTP et l'authentification
+- **`SongExplorer.Services.ArtistLookup`** — Service d'orchestration, coordonne la recherche entre la base de données et l'API Deezer
+- **`SongExplorer.Catalog`** — Contexte de persistence (CRUD artistes et albums en PostgreSQL)
 - **`SongExplorer.Deezer.Client`** — Client HTTP pour l'API publique de Deezer (recherche artiste, récupération albums avec pagination)
-- **`SongExplorer.Catalog`** — Contexte métier (persistance artistes et albums en PostgreSQL)
-- **`SongExplorerWeb.ArtistController`** — Controller REST exposant l'endpoint `/api/artists/:name/albums`
+- **`SongExplorerWeb.Plugs.ApiKeyAuth`** — Plug d'authentification par clé API

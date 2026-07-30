@@ -187,7 +187,7 @@ defmodule SongExplorer.Catalog do
   def save_artist_with_albums_async(artist_attrs, albums_attrs) do
     Task.Supervisor.start_child(SongExplorer.TaskSupervisor, fn ->
       Logger.info(
-        "[CATALOG] Saving artist #{artist_attrs[:name]} (#{artist_attrs[:deezer_id]}) with #{length(albums_attrs)} albums ..."
+        "[CATALOG] Saving artist #{artist_attrs[:name]} with Deezer ID #{artist_attrs[:deezer_id]} and #{length(albums_attrs)} albums ..."
       )
 
       save_artist_with_albums(artist_attrs, albums_attrs)
