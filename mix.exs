@@ -10,7 +10,8 @@ defmodule SongExplorer.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      test_coverage: [threshold: 80]
     ]
   end
 
@@ -46,7 +47,9 @@ defmodule SongExplorer.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:req, "~> 0.5"},
       {:bypass, "~> 2.1", only: :test},
-      {:open_api_spex, "~> 3.21"}
+      {:open_api_spex, "~> 3.21"},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:doctor, "~> 0.22", only: :dev}
     ]
   end
 

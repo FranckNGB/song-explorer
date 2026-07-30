@@ -1,4 +1,5 @@
 defmodule SongExplorerWeb.Endpoint do
+  @moduledoc false
   use Phoenix.Endpoint, otp_app: :song_explorer
 
   # The session will be stored in the cookie and signed,

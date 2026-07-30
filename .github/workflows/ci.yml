@@ -119,11 +119,40 @@ jobs:
           DB_NAME: song_explorer_test
         run: mix ecto.create && mix ecto.migrate
 
-      - name: Run tests
+      - name: Run tests with coverage
         env:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
           DB_HOSTNAME: localhost
           DB_PORT: 5432
           DB_NAME: song_explorer_test
-        run: mix test
+        run: mix test --cover --cover-threshold 80
+
+  doc_coverage:
+    name: Check documentation coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18.4"
+          otp-version: "28.0.2"
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check documentation coverage
+        run: mix doctor

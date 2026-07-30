@@ -50,6 +50,25 @@ defmodule SongExplorer.CatalogTest do
       assert length(artist.albums) == 2
     end
 
+    test "save_artist_with_albums_async/2 saves artist and albums asynchronously" do
+      artist_attrs = %{name: "Booba", deezer_id: 390}
+
+      albums_attrs = [
+        %{title: "Temps Mort", release_date: "2002-10-21"},
+        %{title: "Panthéon", release_date: "2004-11-22"}
+      ]
+
+      assert {:ok, _pid} =
+               Catalog.save_artist_with_albums_async(artist_attrs, albums_attrs)
+
+      # Attendre que le Task termine
+      Process.sleep(100)
+
+      artist = Catalog.get_artist_by_name("Booba")
+      assert artist.deezer_id == 390
+      assert length(artist.albums) == 2
+    end
+
     test "save_artist_with_albums/2 with invalid artist returns error" do
       artist_attrs = %{name: nil, deezer_id: nil}
       albums_attrs = [%{title: "Album", release_date: "2024-01-01"}]

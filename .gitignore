@@ -31,5 +31,8 @@ mix.lock
 # Elixir LS
 .elixir_ls
 
+# Generated documentation
+/doc/
+
 # Environment variables
 .env

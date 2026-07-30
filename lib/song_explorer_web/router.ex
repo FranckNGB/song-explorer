@@ -1,4 +1,5 @@
 defmodule SongExplorerWeb.Router do
+  @moduledoc false
   use SongExplorerWeb, :router
 
   pipeline :api do

@@ -1,6 +1,26 @@
 defmodule SongExplorer.Catalog.Album do
+  @moduledoc """
+  Schéma Ecto représentant un album musical.
+
+  ## Champs
+    - `title` : titre de l'album
+    - `release_date` : date de sortie de l'album
+
+  ## Relations
+    - `belongs_to :artist` : artiste auquel l'album est associé
+  """
   use Ecto.Schema
   import Ecto.Changeset
+
+  @type t :: %__MODULE__{
+          id: integer() | nil,
+          title: String.t() | nil,
+          release_date: Date.t() | nil,
+          artist_id: integer() | nil,
+          artist: SongExplorer.Catalog.Artist.t() | Ecto.Association.NotLoaded.t(),
+          inserted_at: DateTime.t() | nil,
+          updated_at: DateTime.t() | nil
+        }
 
   schema "albums" do
     field :title, :string

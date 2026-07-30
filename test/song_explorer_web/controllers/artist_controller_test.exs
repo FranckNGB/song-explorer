@@ -118,6 +118,21 @@ defmodule SongExplorerWeb.ArtistControllerTest do
     end
 
     @doc """
+    Vérifie que l'endpoint retourne une erreur 503
+    lorsque l'API Deezer est indisponible.
+    """
+    test "returns 503 when Deezer API is unavailable", %{conn: conn, bypass: bypass} do
+      Bypass.down(bypass)
+
+      conn =
+        conn
+        |> with_api_key()
+        |> get("/api/artists/drake/albums")
+
+      assert json_response(conn, 503)["error"] == "Deezer API unavailable"
+    end
+
+    @doc """
     Vérifie que l'endpoint retourne une erreur 401
     lorsque la clé API est absente.
     """
