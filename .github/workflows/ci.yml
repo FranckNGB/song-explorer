@@ -126,11 +126,21 @@ jobs:
           DB_HOSTNAME: localhost
           DB_PORT: 5432
           DB_NAME: song_explorer_test
-        run: mix test --cover --cover-threshold 80
+        run: |
+          mix test --cover 2>&1 | tee cover_output.txt
+          COVERAGE=$(grep "Total" cover_output.txt | grep -oP '[\d.]+(?=%)')
+          echo "Code coverage: ${COVERAGE}%"
+          if [ $(echo "$COVERAGE < 80" | bc -l) -eq 1 ]; then
+            echo "Coverage ${COVERAGE}% is below 80% threshold"
+            exit 1
+          fi
 
   doc_coverage:
     name: Check documentation coverage
     runs-on: ubuntu-latest
+
+    env:
+      MIX_ENV: dev
 
     steps:
       - name: Checkout code
@@ -148,8 +158,8 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
+          key: ${{ runner.os }}-mix-dev-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-dev-
 
       - name: Install dependencies
         run: mix deps.get
