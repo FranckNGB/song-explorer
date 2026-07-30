@@ -20,6 +20,21 @@ defmodule SongExplorer.CatalogTest do
       assert Catalog.get_artist!(artist.id) == artist
     end
 
+    test "get_artist_by_name/1 returns the artist with preloaded albums" do
+      artist = artist_fixture(%{name: "Drake", deezer_id: 246_791})
+      album_fixture(%{artist_id: artist.id})
+
+      result = Catalog.get_artist_by_name(artist.name)
+
+      assert result.name == artist.name
+      assert result.deezer_id == artist.deezer_id
+      assert length(result.albums) == 1
+    end
+
+    test "get_artist_by_name/1 returns nil when artist does not exist" do
+      assert Catalog.get_artist_by_name("Inconnu") == nil
+    end
+
     test "create_artist/1 with valid data creates a artist" do
       valid_attrs = %{name: "some name", deezer_id: 42}
 

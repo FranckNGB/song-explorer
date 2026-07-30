@@ -38,6 +38,29 @@ defmodule SongExplorer.Catalog do
   def get_artist!(id), do: Repo.get!(Artist, id)
 
   @doc """
+  Recherche un artiste par son nom et précharge ses albums.
+
+  Retourne `nil` si aucun artiste n'est trouvé.
+
+  ## Paramètres
+    - `name` : le nom de l'artiste à rechercher
+
+  ## Exemples
+
+      iex> get_artist_by_name("Drake")
+      %Artist{name: "Drake", albums: [%Album{}, ...]}
+
+      iex> get_artist_by_name("Inconnu")
+      nil
+
+  """
+  def get_artist_by_name(name) do
+    Artist
+    |> Repo.get_by(name: name)
+    |> Repo.preload(:albums)
+  end
+
+  @doc """
   Creates a artist.
 
   ## Examples
