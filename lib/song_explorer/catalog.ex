@@ -3,6 +3,8 @@ defmodule SongExplorer.Catalog do
   The Catalog context.
   """
 
+  require Logger
+
   import Ecto.Query, warn: false
   alias SongExplorer.Repo
 
@@ -175,6 +177,34 @@ defmodule SongExplorer.Catalog do
     |> Repo.insert()
   end
 
+  @doc """
+  Sauvegarde un artiste et ses albums de manière asynchrone via Task.Supervisor.
+
+  ## Paramètres
+    - `artist_attrs` : map avec les clés `:name` et `:deezer_id`
+    - `albums_attrs` : liste de maps avec les clés `:title` et `:release_date`
+  """
+  def save_artist_with_albums_async(artist_attrs, albums_attrs) do
+    Task.Supervisor.start_child(SongExplorer.TaskSupervisor, fn ->
+      Logger.info(
+        "[CATALOG] Saving artist #{artist_attrs[:name]} (#{artist_attrs[:deezer_id]}) with #{length(albums_attrs)} albums ..."
+      )
+
+      save_artist_with_albums(artist_attrs, albums_attrs)
+    end)
+  end
+
+  @doc """
+  Sauvegarde un artiste et ses albums en base de données dans une transaction.
+
+  ## Paramètres
+    - `artist_attrs` : map avec les clés `:name` et `:deezer_id`
+    - `albums_attrs` : liste de maps avec les clés `:title` et `:release_date`
+
+  ## Retour
+    - `{:ok, result}` en cas de succès
+    - `{:error, changeset}` en cas d'erreur
+  """
   def save_artist_with_albums(artist_attrs, albums_attrs) do
     Repo.transaction(fn ->
       artist_attrs

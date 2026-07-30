@@ -15,7 +15,8 @@ defmodule SongExplorer.Application do
       # Start a worker by calling: SongExplorer.Worker.start_link(arg)
       # {SongExplorer.Worker, arg},
       # Start to serve requests, typically the last entry
-      SongExplorerWeb.Endpoint
+      SongExplorerWeb.Endpoint,
+      {Task.Supervisor, name: SongExplorer.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
