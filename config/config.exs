@@ -10,7 +10,8 @@ import Config
 config :song_explorer,
   ecto_repos: [SongExplorer.Repo],
   generators: [timestamp_type: :utc_datetime],
-  deezer_base_url: System.get_env("DEEZER_BASE_URL") || "https://api.deezer.com"
+  deezer_base_url: System.get_env("DEEZER_BASE_URL") || "https://api.deezer.com",
+  se_api_key: System.get_env("SE_API_KEY") || ""
 
 # Configures the endpoint
 config :song_explorer, SongExplorerWeb.Endpoint,

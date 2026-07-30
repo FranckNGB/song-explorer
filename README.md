@@ -47,12 +47,24 @@ mix ecto.migrate
 
 L'API est disponible sur `http://localhost:4000`.
 
+## Authentification
+
+L'API est protégée par une clé API. Renseignez la variable `SE_API_KEY` dans votre fichier `.env`.
+
+La clé doit être passée dans le header `x-api-key` à chaque requête :
+
+```bash
+curl -H "x-api-key: votre_api_key" http://localhost:4000/api/artists/drake/albums
+```
+
 ## Documentation Swagger
 
 Une interface Swagger UI est disponible pour explorer et tester l'API :
 
 - **Swagger UI** : `http://localhost:4000/swaggerui`
 - **Spec OpenAPI (JSON)** : `http://localhost:4000/api/openapi`
+
+Pour tester via Swagger, cliquez sur le bouton **"Authorize"** et renseignez votre clé API. La clé est persistée dans le navigateur.
 
 ## Utilisation
 
@@ -65,7 +77,7 @@ GET /api/artists/:name/albums
 Exemple :
 
 ```bash
-curl http://localhost:4000/api/artists/drake/albums
+curl -H "x-api-key: votre_api_key" http://localhost:4000/api/artists/drake/albums
 ```
 
 Réponse :

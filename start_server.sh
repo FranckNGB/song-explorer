@@ -17,4 +17,5 @@ else
 fi
 
 echo "Starting SongExplorer server..."
+echo -e "\033[0;36m[INFO] Swagger UI available at http://localhost:4000/swaggerui\033[0m"
 iex -S mix phx.server

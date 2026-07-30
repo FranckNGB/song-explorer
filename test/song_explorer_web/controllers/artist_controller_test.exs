@@ -7,18 +7,27 @@ defmodule SongExplorerWeb.ArtistControllerTest do
   """
   use SongExplorerWeb.ConnCase
 
+  @api_key "test_api_key"
+
   # Configure Bypass pour intercepter les appels à l'API Deezer.
   # La base URL est redirigée vers le serveur Bypass local.
-  # À la fin de chaque test, la configuration originale est restaurée.
+  # Configure une API key de test.
+  # À la fin de chaque test, les configurations originales sont restaurées.
   setup do
     bypass = Bypass.open()
     Application.put_env(:song_explorer, :deezer_base_url, "http://localhost:#{bypass.port}")
+    Application.put_env(:song_explorer, :se_api_key, @api_key)
 
     on_exit(fn ->
       Application.put_env(:song_explorer, :deezer_base_url, "https://api.deezer.com")
     end)
 
     {:ok, bypass: bypass}
+  end
+
+  # Ajoute le header x-api-key à la connexion
+  defp with_api_key(conn) do
+    put_req_header(conn, "x-api-key", @api_key)
   end
 
   describe "GET /api/artists/:name/albums" do
@@ -53,7 +62,11 @@ defmodule SongExplorerWeb.ArtistControllerTest do
         )
       end)
 
-      conn = get(conn, "/api/artists/eminem/albums")
+      conn =
+        conn
+        |> with_api_key()
+        |> get("/api/artists/eminem/albums")
+
       response = json_response(conn, 200)
 
       assert length(response["albums"]) == 2
@@ -71,7 +84,11 @@ defmodule SongExplorerWeb.ArtistControllerTest do
         |> Plug.Conn.resp(200, Jason.encode!(%{"data" => []}))
       end)
 
-      conn = get(conn, "/api/artists/unknownartist/albums")
+      conn =
+        conn
+        |> with_api_key()
+        |> get("/api/artists/unknownartist/albums")
+
       assert json_response(conn, 404)["error"] == "Artist not found"
     end
 
@@ -89,11 +106,37 @@ defmodule SongExplorerWeb.ArtistControllerTest do
         artist_id: artist.id
       })
 
-      conn = get(conn, "/api/artists/Drake/albums")
+      conn =
+        conn
+        |> with_api_key()
+        |> get("/api/artists/Drake/albums")
+
       response = json_response(conn, 200)
 
       assert length(response["albums"]) == 1
       assert hd(response["albums"])["title"] == "Scorpion"
+    end
+
+    @doc """
+    Vérifie que l'endpoint retourne une erreur 401
+    lorsque la clé API est absente.
+    """
+    test "returns 401 when API key is missing", %{conn: conn} do
+      conn = get(conn, "/api/artists/drake/albums")
+      assert json_response(conn, 401)["error"] == "Invalid or missing API key"
+    end
+
+    @doc """
+    Vérifie que l'endpoint retourne une erreur 401
+    lorsque la clé API est invalide.
+    """
+    test "returns 401 when API key is invalid", %{conn: conn} do
+      conn =
+        conn
+        |> put_req_header("x-api-key", "wrong_key")
+        |> get("/api/artists/drake/albums")
+
+      assert json_response(conn, 401)["error"] == "Invalid or missing API key"
     end
   end
 end
