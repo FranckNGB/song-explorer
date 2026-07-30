@@ -56,7 +56,8 @@ defmodule SongExplorer.Catalog do
   """
   def get_artist_by_name(name) do
     Artist
-    |> Repo.get_by(name: name)
+    |> where([a], ilike(a.name, ^name))
+    |> Repo.one()
     |> Repo.preload(:albums)
   end
 
@@ -172,6 +173,32 @@ defmodule SongExplorer.Catalog do
     %Album{}
     |> Album.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def save_artist_with_albums(artist_attrs, albums_attrs) do
+    Repo.transaction(fn ->
+      artist_attrs
+      |> insert_artist()
+      |> insert_albums(albums_attrs)
+    end)
+  end
+
+  defp insert_artist(artist_attrs) do
+    %Artist{}
+    |> Artist.changeset(artist_attrs)
+    |> Repo.insert()
+    |> case do
+      {:ok, artist} -> artist
+      {:error, changeset} -> Repo.rollback(changeset)
+    end
+  end
+
+  defp insert_albums(artist, albums_attrs) do
+    Enum.each(albums_attrs, fn album_attrs ->
+      %Album{}
+      |> Album.changeset(Map.put(album_attrs, :artist_id, artist.id))
+      |> Repo.insert!()
+    end)
   end
 
   @doc """

@@ -35,6 +35,29 @@ defmodule SongExplorer.CatalogTest do
       assert Catalog.get_artist_by_name("Inconnu") == nil
     end
 
+    test "save_artist_with_albums/2 saves artist and albums" do
+      artist_attrs = %{name: "Eminem", deezer_id: 13}
+
+      albums_attrs = [
+        %{title: "The Slim Shady LP", release_date: "1999-02-23"},
+        %{title: "The Marshall Mathers LP", release_date: "2000-05-23"}
+      ]
+
+      assert {:ok, _result} = Catalog.save_artist_with_albums(artist_attrs, albums_attrs)
+
+      artist = Catalog.get_artist_by_name("Eminem")
+      assert artist.deezer_id == 13
+      assert length(artist.albums) == 2
+    end
+
+    test "save_artist_with_albums/2 with invalid artist returns error" do
+      artist_attrs = %{name: nil, deezer_id: nil}
+      albums_attrs = [%{title: "Album", release_date: "2024-01-01"}]
+
+      assert {:error, _changeset} = Catalog.save_artist_with_albums(artist_attrs, albums_attrs)
+      assert Catalog.list_artists() == []
+    end
+
     test "create_artist/1 with valid data creates a artist" do
       valid_attrs = %{name: "some name", deezer_id: 42}
 

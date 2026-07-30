@@ -9,8 +9,17 @@ defmodule SongExplorerWeb.ArtistController do
     |> Catalog.get_artist_by_name()
     |> case do
       %{albums: albums} ->
+        formatted_albums =
+          Enum.map(albums, fn album ->
+            %{title: album.title, release_date: album.release_date}
+          end)
+
+        IO.puts(
+          "[ARTIST CONTROLLER] The artist #{name} is already presents in our database. Fetching from database ..."
+        )
+
         conn
-        |> json(%{albums: albums})
+        |> json(%{albums: formatted_albums})
 
       nil ->
         with {:ok, %{name: artist_name, deezer_id: deezer_id}} <- Client.search_artist(name),
@@ -18,6 +27,8 @@ defmodule SongExplorerWeb.ArtistController do
           IO.puts(
             "[ARTIST CONTROLLER] TODO: save artist #{artist_name} (#{deezer_id}) with #{length(albums)} albums"
           )
+
+          Catalog.save_artist_with_albums(%{name: artist_name, deezer_id: deezer_id}, albums)
 
           conn
           |> json(%{albums: albums})
