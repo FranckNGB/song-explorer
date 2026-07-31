@@ -53,6 +53,16 @@ defmodule SongExplorer.Deezer.ClientTest do
 
       assert {:error, _reason} = Client.search_artist("drake")
     end
+
+    test "returns error on non-200 status", %{bypass: bypass} do
+      Bypass.expect(bypass, "GET", "/search/artist", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(403, Jason.encode!(%{"error" => "rate limited"}))
+      end)
+
+      assert {:error, {:deezer_error, 403}} = Client.search_artist("drake")
+    end
   end
 
   describe "get_albums/1" do
@@ -122,6 +132,16 @@ defmodule SongExplorer.Deezer.ClientTest do
       Bypass.down(bypass)
 
       assert {:error, _reason} = Client.get_albums(13)
+    end
+
+    test "returns error on non-200 status", %{bypass: bypass} do
+      Bypass.expect(bypass, "GET", "/artist/13/albums", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(500, Jason.encode!(%{"error" => "internal server error"}))
+      end)
+
+      assert {:error, {:deezer_error, 500}} = Client.get_albums(13)
     end
   end
 end

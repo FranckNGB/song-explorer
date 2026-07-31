@@ -35,5 +35,6 @@ defmodule SongExplorer.Catalog.Album do
     album
     |> cast(attrs, [:title, :release_date, :artist_id])
     |> validate_required([:title, :release_date])
+    |> unique_constraint([:artist_id, :title], name: :albums_artist_id_title_index)
   end
 end

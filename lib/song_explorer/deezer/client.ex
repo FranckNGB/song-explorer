@@ -21,7 +21,7 @@ defmodule SongExplorer.Deezer.Client do
     - `{:error, reason}` en cas d'erreur HTTP
   """
   def search_artist(name) do
-    case Req.get("#{base_url()}/search/artist", params: [q: name]) do
+    case Req.get("#{base_url()}/search/artist", params: [q: name], receive_timeout: 10_000) do
       {:ok, %{status: 200, body: %{"data" => data}}} when data != [] ->
         %{"name" => artist_name, "id" => artist_id} =
           Enum.max_by(data, fn %{"nb_fan" => nb_fan} -> nb_fan end)
@@ -30,6 +30,9 @@ defmodule SongExplorer.Deezer.Client do
 
       {:ok, %{status: 200, body: %{"data" => []}}} ->
         {:error, :not_found}
+
+      {:ok, %{status: status}} ->
+        {:error, {:deezer_error, status}}
 
       {:error, reason} ->
         {:error, reason}
@@ -54,7 +57,7 @@ defmodule SongExplorer.Deezer.Client do
   end
 
   defp fetch_all_albums(url, acc) do
-    case Req.get(url) do
+    case Req.get(url, receive_timeout: 10_000) do
       {:ok, %{status: 200, body: %{"data" => data, "next" => next_page_url}}}
       when data != [] ->
         next_page_url
@@ -65,6 +68,9 @@ defmodule SongExplorer.Deezer.Client do
 
       {:ok, %{status: 200, body: %{"data" => []}}} ->
         if acc == [], do: {:error, :not_found}, else: {:ok, Enum.reverse(acc)}
+
+      {:ok, %{status: status}} ->
+        {:error, {:deezer_error, status}}
 
       {:error, reason} ->
         {:error, reason}

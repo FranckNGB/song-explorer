@@ -20,6 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :song_explorer, SongExplorerWeb.Endpoint, server: true
 end
 
+config :song_explorer,
+  deezer_base_url: System.get_env("DEEZER_BASE_URL") || "https://api.deezer.com",
+  se_api_key: System.get_env("SE_API_KEY") || ""
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

@@ -57,8 +57,10 @@ defmodule SongExplorer.Catalog do
 
   """
   def get_artist_by_name(name) do
+    downcased = String.downcase(name)
+
     Artist
-    |> where([a], ilike(a.name, ^name))
+    |> where([a], fragment("LOWER(?)", a.name) == ^downcased)
     |> Repo.one()
     |> Repo.preload(:albums)
   end
@@ -216,10 +218,20 @@ defmodule SongExplorer.Catalog do
   defp insert_artist(artist_attrs) do
     %Artist{}
     |> Artist.changeset(artist_attrs)
-    |> Repo.insert()
+    |> Repo.insert(
+      on_conflict: :nothing,
+      conflict_target: :deezer_id,
+      returning: true
+    )
     |> case do
-      {:ok, artist} -> artist
-      {:error, changeset} -> Repo.rollback(changeset)
+      {:ok, %Artist{id: nil}} ->
+        Repo.get_by!(Artist, deezer_id: artist_attrs.deezer_id)
+
+      {:ok, artist} ->
+        artist
+
+      {:error, changeset} ->
+        Repo.rollback(changeset)
     end
   end
 
@@ -227,7 +239,7 @@ defmodule SongExplorer.Catalog do
     Enum.each(albums_attrs, fn album_attrs ->
       %Album{}
       |> Album.changeset(Map.put(album_attrs, :artist_id, artist.id))
-      |> Repo.insert!()
+      |> Repo.insert(on_conflict: :nothing, conflict_target: [:artist_id, :title])
     end)
   end
 
